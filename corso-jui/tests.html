@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>corso jQuery UI</title>
-	<link rel="stylesheet" href="../stylesheets/base-ui/jquery-ui.css">
+	<link rel="stylesheet" href="../stylesheets/start/jquery-ui-1.10.3.custom.min.css">
 	<link rel="stylesheet" href="../stylesheets/jquery.dw.calculator.css">
 </head>
 <body>
@@ -20,50 +20,45 @@
 	<script src="../js/libs/jquery.ui.button.js"></script>
 	<script src="../js/custom/jquery.dw.calculator.js"></script>
 <script>
-	$(function(){
-		//console.log($.dw);
-		$('#calc').calculator({
-			//se si passa un arrey questo va a sostituire quello di default.
-			//buttons:[{label: 'new'}]
-			//show: true,
-			showOnCreate: true,
-			beforeAddButton: function (e, ui){
-				if (ui.label === 'MR' || ui.label === 'MS' || ui.label === 'MC'){
-					return false;
-				}
-			},
-			shown: function (e){
-				console.log('shown');
-			}
+$(function () {
+    $('#calc').calculator({
+        //calc è visibile al caricamento della pagina
+    	showOnCreate: true,
+    	//i pulsanti mr ms e mc vengono nascosti
+        beforeAddButton: function (e, ui) {
+            if (ui.label === 'MR' || ui.label === 'MS' || ui.label === 'MC') {
+                return false;
+            }
+        },
+        shown: function (e) {
+            console.log('Shown!');
+        }
+    });
 
-		});
-		$('#change').on('click',function(){
-			$('#calc').calculator('option','buttons',[{label: 'Test'}]);
-		});
-
-		//disable option
-		$('#disable').on('click',function(){
-			$('#calc').calculator('option','disabled',true);
-		});
-
-		//disable method
-		$('#disable2').on('click',function(){
-			$('#calc').calculator('disable');
-		});
-		//enable option
-		$('#enable').on('click',function(){
-			$('#calc').calculator('option','disabled',false);
-		});
-
-		//enable method
-		$('#enable2').on('click',function(){
-			$('#calc').calculator('enable');
-		});
-
-		$('#show').on('click',function(){
-			$('#calc').calculator('show');
-		});
-	});
+    $('#change').click(function () {
+        $('#calc').calculator('option', 'buttons', [{ label: 'Test' }]);
+    });
+	//disable option
+    $('#disable').click(function () {
+        $('#calc').calculator('option', 'disabled', true);
+    });
+	//call disable method
+    $('#disable2').click(function () {
+        $('#calc').calculator('disable');
+    });
+	//enable option
+    $('#enable').click(function () {
+        $('#calc').calculator('option', 'disabled', false);
+    });
+	//call enable method
+    $('#enable2').click(function () {
+        $('#calc').calculator('enable');
+    });
+    //call show method
+    $('#show').click(function () {
+        $('#calc').calculator('show');
+    });
+});
 </script>
 
 </body>

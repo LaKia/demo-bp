@@ -1,5 +1,12 @@
-(function($, undefined){
+/**
+ * GUIDA
+ * http://api.jqueryui.com/jQuery.widget/#option-hide
+ *
+ */
 
+
+(function($, undefined){
+	//array con tutti i bottoni con le loro proprietà(label,classname,action)
 	var buttons = [
 	       		{ label: 'MR' },
 	       		{ label: 'MS' },
@@ -23,100 +30,263 @@
 	       		{ label: '.', classname: 'dw-calculator-dot', action: 'dot' },
 	       		{ label: '=', classname: 'dw-calculator-equals', action: 'equals' }
 	       	];
-	//extend ui.button -> da console si vedono i parametri relativi a button(label,icons, ecc) nelle opziioni in prototype.
-	/*$.widget('dw.calculator', $.ui.button,{
-		version:'0.0.1'
-	});*/
 
-	$.widget('dw.calculator',{
-		version:'0.0.1',
-		/* aggiungere opzioni configurabili = 1 */
-		options: {
-			buttons: buttons,
-			showOnCreate: false,
-			show:false,
-			hide:false,
-			beforeAddButton:null,
-			shown:null,
-			hidden:null,
-		},
+	//inizializzazione del widjet con le varie opzioni di default
+	       	$.widget('dw.calculator', {
+	       		version: '0.0.1',
+	       		options: {
+	       			buttons: buttons,
+	       			showOnCreate: false,
+	       			show: false,
+	       			hide: false,
+	       			beforeAddButton: null,
+	       			shown: null,
+	       			hidden: null
+	       		},
 
-		_create: function(){
-			this.element.addClass('dw-calculator');
-			this._createWrapper();
-			this._createButtons();
-			this._renderMurkup();
+	//metodo di creazione dei componeti del widjet
+	       		_create: function () {
+	       			this.element.addClass('dw-calculator ui-widget ui-corner-all');
+	       			this._createWrapper();
+	       			this._createButtons();
+	       			this._renderMarkup();
 
-			//console.log(this.options);
-		},
+	       			this._on({
+	       				'click button': this._handleClick
+	       			});
 
-		_createWrapper: function(){
-			var el = $('<div/>'),
-			widget = this,
-			displays;
+	       			this.currentDisplay = [];
+	       			this.runningDisplay = [];
+	       			this.numberInput = false;
+	       		},
 
-			this.shell = el.clone().addClass('dw-calculator-shell');
-			displays = el.clone().addClass('dw-calculator-displays').appendTo(this.shell);
-			el.clone().addClass('dw-calcolator-calculation').appendTo(displays);
-			el.clone().addClass('dw-calculator-display').appendTo(displays);
+	//metodo di creazione del contenitore del widjet
+	       		_createWrapper: function() {
+	       			var el = $('<div/>'),
+	       				widget = this,
+	       				displays;
 
-			if (!this.options.showOnCreate){
-				this._hide(this.element, this.options.hide, function(){
-					widget._trigger('hidden');
-				});
+	       			this.shell = el.clone().addClass('dw-calculator-shell ui-widget-header ui-corner-all');
+	       			displays = el.clone().addClass('dw-calculator-displays ui-widget-content ui-corner-all').appendTo(this.shell);
+	       			el.clone().addClass('dw-calculator-calculation').appendTo(displays);
+	       			el.clone().text('0').addClass('dw-calculator-display').appendTo(displays);
 
-			}
-		},
+	       			if (!this.options.showOnCreate) {
+	       				this._hide(this.element, this.options.hide, function () {
+	       					widget._trigger('hidden');
+	       				});
+	       			}
+	       		},
+	//metodo di creazione dei bottoni del widget.
+	       		_createButtons: function () {
+	       			var el = $('<button/>'),
+	       				container = $('<div/>').addClass('ui-helper-clearfix ui-widget-content ui-corner-all'),
+	       				widget = this;
+	/*Per ogni elemento dell'array buttons viene creato un elemento button con la classe classname,
+	l'attibuto data action e la label passati come proprietò del bottone nell'array.*/
+	       			$.each(this.options.buttons, function (i, button) {
+	       				if (widget._trigger('beforeAddButton', null, button)) {
+	       					var btn = el.clone().text(button.label).appendTo(container).button();
+	       					if (!!button.classname) {
+	       						btn.addClass(button.classname);
+	       					}
 
-		_createButtons: function(){
-			var el = $('<button/>'),
-			container = $('<div/>').addClass('ui-helper-clearfix'),
-			widget = this;
+	       					if (typeof button.action === 'string') {
+	       						btn.data('action', button.action);
+	       					} else if (typeof button.action === 'function') {
+	       						var fnName = 'custom' + i;
 
-			$.each(this.options.buttons, function (i, button) {
-				if (widget._trigger('beforeAddButton', null, button)) {
-					var btn = el.clone().text(button.label).appendTo(container).button();
-					if (!!button.classname) {
-						btn.addClass(button.classname);
-					}
-				}
-			});
+	       						widget['_' + fnName] = button.action;
+	       						btn.data('action', fnName);
+	       					}
+	       				}
+	       			});
 
-			container.appendTo(this.shell);
-		},
+	       			container.appendTo(this.shell);
+	       		},
+	//
+	       		_renderMarkup: function () {
+	       			this.shell.appendTo(this.element);
+	       		},
 
-		_renderMurkup: function (){
-			this.shell.appendTo(this.element);
-		},
+	       		_setOptions: function (options) {
+	       			//Invokes the method of the same name from the parent widget, with the array of arguments. Essentially .apply().
+	       			//invoca _setOptions passando un array
+	       			this._superApply(arguments);
+	       		},
 
-		_setOptions: function (options){
-			this._superApply(arguments);
-		},
+	       		_setOption: function (key, val) {
+	       			//Invokes the method of the same name from the parent widget, with any specified arguments. Essentially .call().
+	       			//invoca _setOption passando un oggetto
+	       			this._super(key, val);
 
-		_setOption: function (key, val){
-			this._super(key, val);
+	       			if (key === 'buttons') {
+	       				this.shell.find('button').remove();
+	       				this._createButtons();
+	       				this._renderMarkup();
+	       			} else if (key === 'disabled') {
+	       				this.shell.find('button').button('option', key, val);
+	       			}
+	       		},
 
-			if (key === 'buttons'){
-				this.shell.find('button').remove();
-				this._createButtons();
-				this._renderMurkup();
-			}
-			else if (key === 'disabled'){
-				this.shell.find('button').button('option', key, val);
-			}
-		},
-		_destroy: function (){
-			this.element.removeClass('dw-calculator');
-			this.element.empty();
-		},
+	       		_destroy: function () {
+	       			this.element.removeClass('dw-calculator');
+	       			this.element.empty();
+	       		},
 
-		show: function(){
-			var widget= this;
-			this._show(this.element, this.option.show, function(){
-				widget._trigger ('shown');
-			});
+	       		show: function () {
+	       			var widget = this;
 
-		}
+	       			this._show(this.element, this.options.show, function () {
+		//Triggers an event and its associated callback.
+	       				widget._trigger('shown');
+	       			});
+	       		},
 
-	});
+	       		_handleClick: function (e) {
+	       			var btn = $(e.target).closest('button'),
+	       				fn = btn.data('action');
+
+	       			this['_' + fn](e, btn);
+	       		},
+
+	       		_clear: function (e, ui) {
+	       			this.currentDisplay = [];
+	       			this.runningDisplay = [];
+	       			this.numericalInput = false;
+	       			this._updateDisplay();
+	       			this._updateRunningDisplay();
+	       		},
+
+	       		_clearEntry: function (e, ui) {
+	       			this.currentDisplay = [];
+	       			this._updateDisplay();
+	       		},
+
+	       		_operator: function (e, ui) {
+	       			if (!this.currentDisplay.length && !this.runningDisplay.length) {
+	       				this.currentDisplay.push(this.element.find('.dw-calculator-display').text());
+	       			} else if (this.currentDisplay.slice(0).reverse()[0] === '.') {
+	       				this.currentDisplay.pop();
+	       			}
+
+	       			if (!this.runningDisplay.length || this.numericalInput) {
+	       				this.runningDisplay.push([this.currentDisplay.join(''), ' ', ui.text(), ' '].join(''))
+	       			} else if (!this.numericalInput) {
+	       				var length = this.runningDisplay.length,
+	       					newStr = this.runningDisplay[length - 1].replace(/[\*\-\+\/]/, ui.text());
+
+	       				this.runningDisplay.pop();
+	       				this.runningDisplay.push(newStr);
+	       			}
+
+	       			this.numericalInput = false;
+	       			this._updateRunningDisplay();
+	       			this._calculate();
+	       		},
+
+	       		_number: function (e, ui) {
+	       			this.currentDisplay.push(ui.text());
+	       			this._updateDisplay();
+	       			this.numericalInput = true;
+	       		},
+
+	       		_dot: function (e, ui) {
+
+	       			var hasDot = false,
+	       				x = this.currentDisplay.length;
+
+	       			if (!x) {
+	       				this.currentDisplay.push('0');
+	       			}
+
+	       			while (--x >= 0) {
+	       				if (this.currentDisplay[x] === '.') {
+	       					hasDot = true;
+	       					break;
+	       				}
+	       			}
+
+	       			if (hasDot) {
+	       				return false;
+	       			} else {
+	       				this.currentDisplay.push('.');
+	       				this._updateDisplay();
+	       			}
+	       		},
+
+	       		_equals: function (e, ui) {
+	       			this._calculate(true);
+	       		},
+
+	       		_updateDisplay: function (reset) {
+	       			if (!this.currentDisplay.length) {
+	       				this.element.find('.dw-calculator-display').text(0);
+		//limita il numero di caratteri a 17
+	       			} else if (this.currentDisplay.length < 18) {
+	       				this.element.find('.dw-calculator-display').text(this.currentDisplay.join(''));
+	       			}
+
+	       			if (reset) {
+	       				this.currentDisplay = [];
+	       			}
+	       		},
+
+	       		_updateRunningDisplay: function () {
+	       			this.element.find('.dw-calculator-calculation').text(this.runningDisplay.join(''));
+	       			this.currentDisplay = [];
+	       		},
+   		//	metodo pereffettuare i calcoli
+	       		_calculate: function (final) {
+
+	       			var ops = {
+	       				'+': function (x, y) { return x + y },
+	       				'-': function (x, y) { return x - y },
+	       				'*': function (x, y) { return x * y },
+	       				'/': function (x, y) { return x / y },
+	       			};
+
+	       			function sequentialCalc(str) {
+
+	       				var sumArray = str.split(' '),
+	       					left = +sumArray[0],
+	       					length = sumArray.length,
+	       					x;
+
+	       				for (x = 1; x < length; x = x + 2) {
+	       					left = ops[sumArray[x]](left, +sumArray[x + 1]);
+	       				}
+
+	       				return left;
+	       			}
+
+	       			if (final) {
+
+	       				var running = this.element.find('.dw-calculator-calculation').text(),
+	       					display = this.element.find('.dw-calculator-display').text(),
+	       					sum = [running, display].join('');
+
+	       				this.currentDisplay = [sequentialCalc(sum)];
+	       				this._updateDisplay();
+	       				this.runningDisplay = [];
+	       				this.numericalInput = false;
+	       				this._updateRunningDisplay();
+
+	       			} else if (this.runningDisplay.length > 1) {
+
+	       				var tmp = this.runningDisplay.pop(),
+	       					trimmed = tmp.replace(/\s[\*\-\+\/]\s/, '');
+
+	       				this.runningDisplay.push(trimmed);
+
+	       				this.currentDisplay = [sequentialCalc(this.runningDisplay.join(''))];
+	       				//pop()->remove the last element in a array.
+	       				this.runningDisplay.pop();
+	       				//push()-> Aggiunge un elamento a un array.
+	       				this.runningDisplay.push(tmp);
+	       				this._updateDisplay(true);
+	       			}
+	       		}
+
+	       	});
 }(jQuery));
