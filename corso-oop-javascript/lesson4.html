@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<a href="index.html">Lesson 1-3</a>
+
+<script>
+var createPerson= function(firstName,lastName){
+	var person={};
+
+	//creazione di un propriet� per volta.
+	Object.defineProperty(person, "firstName",{
+		value:firstName,
+	});
+
+	Object.defineProperty(person, "lastName",{
+		value:lastName,
+	});
+
+	//creazione di due propriet�
+	Object.defineProperties(person,{
+		firstName:{
+			value:firstName,
+		},
+		lastName:{
+			value:lastName,
+		},
+	});
+
+	person.fullName = person.firstName + " " + person.lastName;
+	//return person;
+};
+
+var person = createPerson('John','Doe');
+//console.log(person);
+
+
+var createPersonNew = function(firstName,lastName){
+	var personNew = {};
+	console.log (personNew);
+	//creazione di due propriet�
+	Object.defineProperties(personNew,{
+		firstName:{
+			value:firstName,
+			writable:true,
+			enumerable:true
+		},
+
+		lastName:{
+			value:lastName,
+			writable:true,
+		},
+
+		fullName:{
+			get: function(){
+				return this.firstName + ' ' + this.lastName;
+			},
+
+			set: function(value){
+				this.firstName = value;
+				this.lastName = value;
+			},
+
+			configurable: true,
+
+			/*true o false. Se enumerable è impostato su true, la proprietà può essere enumerata da un'istruzione for…in.*/
+			enumerable:true
+		},
+	});
+	return personNew;
+};
+
+var personNew = createPersonNew('Jim','Doe');
+console.log(personNew.fullName);
+//le proprietà possono essere sovrascritte se c'� la propriet� writable = true;
+personNew.firstName = 'Jeremy';
+console.log(personNew.fullName);
+
+//quando viene modificato fullname viene rischiamato il metodo set
+personNew.fullName = 'Justin';
+//quando viene fatto stampare fullname viene richiamato il metodo get
+console.log(personNew.fullName);
+
+//è possibile ridefinire una proprietà soltanto se l'oggetto ha la proprietà configurable = true!
+Object.defineProperty(personNew, "fullName",{
+	get: function(){
+		return this.lastName + ", " + this.firstName;
+	}
+});
+
+console.log(personNew.fullName);
+
+for (var i in personNew) {
+	//se enumerable = true le proprietà risultano keys nei cicli.
+	  console.log(i);
+
+	//risultano keys: firstName e fullName.
+}
+
+
+</script>
+
+
+</body>
+</html>

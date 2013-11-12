@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<a href="lesson4.html">Lesson 4</a>
+
+<script>
+//oggetto
+
+var person = {
+	//proprietà
+	firstName: "John",
+	lastName:"Doe",
+	//metodo
+	sayHi: function(){
+		return "Hi John";
+	}
+};
+/*
+var janeDoe = {
+	firstName: "Jane",
+	lastName:"Doe",
+	sayHi: function(){
+		return "Hi Jane";
+	}
+};
+
+var peterDoe = {
+	firstName: "Peter",
+	lastName:"Doe",
+	position:"Manager",
+	sayHi: function(){
+		return "Hi Peter";
+	}
+};
+*/
+/*console.log(person.firstName);
+console.log(janeDoe.sayHi());
+console.log(peterDoe.position);
+*/
+//funzione globale che può essere chiamata all'interno della funzione che genera gli oggetti.
+var globalGreet = function(){
+	return "il mio cognome: " + this.lastName;
+};
+
+//funzione per creare i vari oggetti person.
+var createPerson = function (firstname, lastname){
+	return{
+		firstName: firstname,
+		lastName: lastname,
+		sayHi: function(){
+			//this può essere usato per indicare l'oggetto corrente
+			return "Hi "+ this.firstName;
+		},
+		greet: globalGreet
+	}
+};
+
+var johnDoe = createPerson("John", "Doe");
+var janeDoe = createPerson("Jane", "Doe");
+
+console.log(johnDoe.firstName);
+console.log(janeDoe.sayHi());
+console.log(janeDoe.greet());
+
+
+/**
+ *Global: var e function aggiunte come proprietà all'oggetto window
+ */
+ window.name = "Jim Doe";
+ window.globalFu = function(){
+	 //in questo caso this si riferisce all'oggetto window
+	 return "my name is " + this.name
+ };
+
+console.log(globalFu());
+
+var peterDoe = {
+		name: "Peter Doe",
+		//in questo caso viene passato anche l'oggetto window e quindi il this si riferisce ad esso.
+		greet: window.globalFu.bind(window),
+		//l'oggetto this si riferisce all'oggetto in cui viene richiamato(peterDoe)
+		greet2:window.globalFu,
+};
+
+console.log(peterDoe.greet());
+console.log(peterDoe.greet2())
+
+
+//Ajax - esempio uso di bind
+
+var makeRequest = function (url, callback){
+	//crea la richiesta alla url passata
+	var data = 10 ;
+	callback(data);
+};
+
+var obj = {
+	someVal:20,
+	loadData: function(data){
+		var sum = this.someVal + data;
+		console.log( 'Il risultato è ' + sum);
+	},
+	prepareRequest: function(){
+		var url = 'http://numberservice.com';
+		makeRequest(url,this.loadData.bind(this))
+	}
+
+};
+
+obj.prepareRequest();
+
+
+
+</script>
+
+
+</body>
+</html>
