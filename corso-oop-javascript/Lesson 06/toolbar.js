@@ -54,7 +54,7 @@
 
     oojs.createToolbar = function (elementId) {
         var element = document.getElementById(elementId);
-        
+        //se l'elemento non c'è nel documento lo creo
         if (!element) {
             element = document.createElement("DIV");
             element.id = elementId;
@@ -85,7 +85,7 @@
                 this.items.splice(index, 1);
 
                 this.el.removeChild(item.el);
-                
+
                 item = null;
             },
             appendTo: function (parentElement) {
